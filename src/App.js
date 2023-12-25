@@ -1,23 +1,44 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState, useEffect, useRef } from "react";
+import "./App.css";
+
+const format = (timer) => {
+  let mins = Math.floor(timer / 60);
+  timer %= 60;
+  return `${mins}:${timer < 10 ? "0" : ""}${timer}`;
+};
 
 function App() {
+  const [isActivated, setIsActivated] = useState(false);
+  const [timer, setTimer] = useState(0);
+  const timerId = useRef(null);
+
+  const toggleHandler = () => {
+    setIsActivated(!isActivated);
+  };
+
+  useEffect(() => {
+    timerId.current = setInterval(() => {
+      if (isActivated) {
+        setTimer((prevTimer) => prevTimer + 1);
+      }
+    }, 1000);
+
+    return () => {
+      clearInterval(timerId.current);
+    };
+  }, [isActivated, timer]);
+
+  const reset = () => {
+    setIsActivated(false);
+    setTimer(0);
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>Stopwatch</h1>
+      <p>Time: {format(timer)}</p>
+      <button onClick={toggleHandler}>{isActivated ? "Stop" : "Start"}</button>
+      <button onClick={reset}>Reset</button>
     </div>
   );
 }
